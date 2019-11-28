@@ -14,7 +14,6 @@ namespace AdventOfCode.Base
         {
             var projectDir = AppContext.BaseDirectory.Substring(0, AppContext.BaseDirectory.IndexOf("bin"));
 
-            var templateDir = projectDir + @"Base\DayTemplate\";
             var dayStr = day.ToString("00");
             var dayDir = projectDir + @"\Day" + dayStr + "\\";
 
@@ -23,7 +22,7 @@ namespace AdventOfCode.Base
 
             Directory.CreateDirectory(dayDir);
 
-            var template = File.ReadAllText(templateDir + "solver.txt");
+            var template = File.ReadAllText(projectDir + @"Base\solver.txt");
             template = template.Replace("[Day]", dayStr);
             File.WriteAllText(dayDir + $"Day{ dayStr}Solver.cs", template);
 
