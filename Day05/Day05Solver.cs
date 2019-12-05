@@ -59,16 +59,19 @@ namespace Day05
 
             private bool ExecNextOp()
             {
-                var op = Mem[Pos];
+                var op = Mem[Pos++];
                 var mode = GetParameterMode(op);
+                op %= 100;
+
                 var param = new[] { 0, 0, 0 };
                 var pnum = 2;
+
                 if (op == 3 || op == 4)
                     pnum = 0;
-                op = op % 100;
+                else if (op == 5 || op == 6)
+                    pnum = 1;
 
-                Pos++;
-                for (int i = 0; i < pnum; i++)
+                for (var i = 0; i < pnum; i++)
                     param[i] = GetValue(Mem[Pos++], mode[i]);
                 var dest = Mem[Pos++];
 
@@ -80,12 +83,25 @@ namespace Day05
                     Mem[dest] = Input.Dequeue();
                 else if (op == 4)
                     Output.Enqueue(Mem[dest]);
+                else if (op == 5)
+                {
+                    if (param[0] != 0)
+                        Pos = dest;
+                }
+                else if (op == 6)
+                {
+                    if (param[0] == 0)
+                        Pos = dest;
+                }
+                else if (op == 7)
+                    Mem[dest] = param[0] < param[1] ? 1 : 0;
+                else if (op == 8)
+                    Mem[dest] = param[0] == param[1] ? 1 : 0;
                 else
                     return false;
 
                 return true;
             }
-
 
             public bool Run()
             {
@@ -112,12 +128,15 @@ namespace Day05
             var comp = new Computer(data[0], new List<int> { 1 });
             comp.Run();
 
-            return "??";
+            return comp.Output.LastOrDefault().ToString();
         }
 
         protected override string Solve2(List<string> data)
         {
-            return "??";
+            var comp = new Computer(data[0], new List<int> { 5 });
+            comp.Run();
+
+            return comp.Output.LastOrDefault().ToString();
         }
 
     }
