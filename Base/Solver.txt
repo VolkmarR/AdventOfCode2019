@@ -5,6 +5,7 @@ using System.Text;
 using System.Linq;
 using Xunit;
 using Xunit.Abstractions;
+using static AdventOfCode.Base.Helpers;
 
 namespace Day[Day]
 {
