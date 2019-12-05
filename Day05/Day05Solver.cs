@@ -65,15 +65,19 @@ namespace Day05
 
                 var param = new[] { 0, 0, 0 };
                 var pnum = 2;
+                var readDest = true;
 
                 if (op == 3 || op == 4)
                     pnum = 0;
                 else if (op == 5 || op == 6)
-                    pnum = 1;
+                {
+                    pnum = 2;
+                    readDest = false;
+                }
 
                 for (var i = 0; i < pnum; i++)
                     param[i] = GetValue(Mem[Pos++], mode[i]);
-                var dest = Mem[Pos++];
+                var dest = readDest ? Mem[Pos++] : 0;
 
                 if (op == 1)
                     Mem[dest] = param[0] + param[1];
@@ -86,12 +90,12 @@ namespace Day05
                 else if (op == 5)
                 {
                     if (param[0] != 0)
-                        Pos = dest;
+                        Pos = param[1];
                 }
                 else if (op == 6)
                 {
                     if (param[0] == 0)
-                        Pos = dest;
+                        Pos = param[1];
                 }
                 else if (op == 7)
                     Mem[dest] = param[0] < param[1] ? 1 : 0;
