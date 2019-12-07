@@ -88,11 +88,8 @@ namespace Day07
 
             var maxValue = 0;
             foreach (var config in GetConfigs(0, 4))
-            {
-                var value = Solve1SingleRun(computers, config);
-                if (value > maxValue)
-                    maxValue = value;
-            }
+                maxValue = MaxValue(maxValue, Solve1SingleRun(computers, config));
+
             return maxValue.ToString();
         }
 
@@ -102,11 +99,8 @@ namespace Day07
 
             var maxValue = 0;
             foreach (var config in GetConfigs(5, 9))
-            {
-                var value = Solve2SingleRun(computer, config);
-                if (value > maxValue)
-                    maxValue = value;
-            }
+                maxValue = MaxValue(maxValue, Solve2SingleRun(computer, config));
+
             return maxValue.ToString();
         }
 

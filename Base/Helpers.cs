@@ -18,5 +18,7 @@ namespace AdventOfCode.Base
             return list.ToArray();
         }
 
+        public static int MaxValue(int value1, int value2)
+            => value2 > value1 ? value2 : value1;
     }
 }
