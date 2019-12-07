@@ -23,7 +23,7 @@ namespace Day07
 
     public class Day07Solver : SolverBase
     {
-        IEnumerable<int[]> GetConfigs()
+        IEnumerable<int[]> GetConfigs1()
         {
             var unique = new HashSet<int>();
             for (int a = 0; a < 5; a++)
@@ -48,13 +48,20 @@ namespace Day07
             var computer = new Computer[] { new Computer(data[0]), new Computer(data[0]), new Computer(data[0]), new Computer(data[0]), new Computer(data[0]) };
             
             var maxValue = 0;
-            foreach (var config in GetConfigs())
+            foreach (var config in GetConfigs1())
             {
                 var value = 0;
                 for (int i = 0; i < 5; i++)
                 {
-                    computer[i].SetInput(new List<int> { config[i], value }).Run();
-                    value = computer[i].Output.Dequeue();
+                    computer[i].Run();
+                    if (computer[i].State == State.WaitForInput)
+                        computer[i].SetInputAndResume(config[i]);
+                    if (computer[i].State == State.WaitForInput)
+                        computer[i].SetInputAndResume(value);
+                    if (computer[i].State == State.OutputProduced)
+                        value = computer[i].GetOutputAndResume();
+                    if (computer[i].State != State.Halt)
+                        throw new Exception("Invalid sequence");
                 }
 
                 if (value > maxValue)

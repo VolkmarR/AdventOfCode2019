@@ -6,30 +6,58 @@ using static AdventOfCode.Base.Helpers;
 
 namespace Day07
 {
+    enum State { Running, Halt, WaitForInput, OutputProduced }
+
     class Computer
     {
         public List<int> Data { get; private set; }
         public List<int> Mem { get; private set; }
 
-        public Queue<int> Input { get; private set; }
-        public Queue<int> Output { get; private set; }
+        private int? Input = null;
+        private int? Output = null;
 
         private int Pos = 0;
+
+        public State State = State.Halt;
 
         public Computer(string data)
         {
             Data = data.Split(",").Select(q => int.Parse(q)).ToList();
         }
 
-        public Computer SetInput(List<int> input)
-        { 
-            Input = new Queue<int>(input);
-            return this;
+        public void SetInputAndResume(int input)
+        {
+            if (State == State.WaitForInput)
+            {
+                Input = input;
+                Resume();
+            }
+            else
+                throw new Exception("Not in Input State");
         }
 
-        bool IsHalt()
-            => Mem[Pos] == 99;
+        public int GetOutputAndResume()
+        {
 
+            if (State == State.OutputProduced)
+            {
+                var result = Output.Value;
+                Resume();
+                return result;
+            }
+            else
+                throw new Exception("Not in Output State");
+        }
+
+
+        bool IsHalt()
+        {
+            var isHalt = Mem[Pos] == 99;
+            if (isHalt)
+                State = State.Halt;
+
+            return isHalt;
+        }
         int[] GetParameterMode(int op)
         {
             var result = new int[] { 0, 0, 0 };
@@ -47,7 +75,8 @@ namespace Day07
 
         private bool ExecNextOp()
         {
-            var op = Mem[Pos++];
+            var opPos = Pos;
+            var op = Mem[opPos++];
             var mode = GetParameterMode(op);
             op %= 100;
 
@@ -64,53 +93,76 @@ namespace Day07
             }
 
             for (var i = 0; i < pnum; i++)
-                param[i] = GetValue(Mem[Pos++], mode[i]);
-            var dest = readDest ? Mem[Pos++] : 0;
+                param[i] = GetValue(Mem[opPos++], mode[i]);
+            var dest = readDest ? Mem[opPos++] : 0;
 
             if (op == 1)
                 Mem[dest] = param[0] + param[1];
             else if (op == 2)
                 Mem[dest] = param[0] * param[1];
             else if (op == 3)
-                Mem[dest] = Input.Dequeue();
+            {
+                if (Input == null || State == State.WaitForInput)
+                {
+                    State = State.WaitForInput;
+                    return true;
+                }
+                Mem[dest] = Input.Value;
+                Input = null;
+            }
             else if (op == 4)
-                Output.Enqueue(Mem[dest]);
+            {
+                if (Output == null || State == State.OutputProduced)
+                {
+                    Output = Mem[dest];
+                    State = State.OutputProduced;
+                    return true;
+                }
+
+                Output = null;
+            }
             else if (op == 5)
             {
                 if (param[0] != 0)
-                    Pos = param[1];
+                    opPos = param[1];
             }
             else if (op == 6)
             {
                 if (param[0] == 0)
-                    Pos = param[1];
+                    opPos = param[1];
             }
             else if (op == 7)
                 Mem[dest] = param[0] < param[1] ? 1 : 0;
             else if (op == 8)
                 Mem[dest] = param[0] == param[1] ? 1 : 0;
             else
-                return false;
+                throw new Exception("Invalid Operation");
 
-            return true;
+            Pos = opPos;
+            return false;
         }
 
-        public bool Run()
+        void Resume()
         {
-            Mem = Data.ToList();
-            Output = new Queue<int>();
-            Pos = 0;
-
+            State = State.Running;
             while (Pos < Mem.Count)
             {
                 if (IsHalt())
-                    return true;
+                    return;
 
-                if (!ExecNextOp())
-                    return false;
+                if (ExecNextOp())
+                    return;
             }
+        }
 
-            return false;
+        public void Run()
+        {
+            Mem = Data.ToList();
+            Output = null;
+            Input = null;
+            Pos = 0;
+
+            Resume();
         }
     }
 }
