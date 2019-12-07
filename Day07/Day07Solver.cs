@@ -23,14 +23,14 @@ namespace Day07
 
     public class Day07Solver : SolverBase
     {
-        IEnumerable<int[]> GetConfigs1()
+        IEnumerable<int[]> GetConfigs(int start, int end)
         {
             var unique = new HashSet<int>();
-            for (int a = 0; a < 5; a++)
-                for (int b = 0; b < 5; b++)
-                    for (int c = 0; c < 5; c++)
-                        for (int d = 0; d < 5; d++)
-                            for (int e = 0; e < 5; e++)
+            for (int a = start; a <= end; a++)
+                for (int b = start; b <= end; b++)
+                    for (int c = start; c <= end; c++)
+                        for (int d = start; d <= end; d++)
+                            for (int e = start; e <= end; e++)
                             {
                                 unique.Clear();
                                 unique.Add(a);
@@ -43,27 +43,53 @@ namespace Day07
                             }
         }
 
-        protected override string Solve1(List<string> data)
+        Computer[] InitComputers(string data)
+            => new Computer[] { new Computer(data), new Computer(data), new Computer(data), new Computer(data), new Computer(data) };
+
+        int Solve1SingleRun(Computer[] computer, int[] config)
         {
-            var computer = new Computer[] { new Computer(data[0]), new Computer(data[0]), new Computer(data[0]), new Computer(data[0]), new Computer(data[0]) };
-            
-            var maxValue = 0;
-            foreach (var config in GetConfigs1())
+            var value = 0;
+            for (int i = 0; i < 5; i++)
             {
-                var value = 0;
+                computer[i].Run();
+                computer[i].SetInputAndResume(config[i]);
+                computer[i].SetInputAndResume(value);
+                value = computer[i].GetOutputAndResume();
+                if (computer[i].State != State.Halt)
+                    throw new Exception("Invalid sequence");
+            }
+
+            return value;
+        }
+
+        int Solve2SingleRun(Computer[] computer, int[] config)
+        {
+            var value = 0;
+            do
+            {
                 for (int i = 0; i < 5; i++)
                 {
-                    computer[i].Run();
-                    if (computer[i].State == State.WaitForInput)
+                    if (computer[i].State == State.Halt)
+                    {
+                        computer[i].Run();
                         computer[i].SetInputAndResume(config[i]);
-                    if (computer[i].State == State.WaitForInput)
-                        computer[i].SetInputAndResume(value);
-                    if (computer[i].State == State.OutputProduced)
-                        value = computer[i].GetOutputAndResume();
-                    if (computer[i].State != State.Halt)
-                        throw new Exception("Invalid sequence");
+                    }
+                    computer[i].SetInputAndResume(value);
+                    value = computer[i].GetOutputAndResume();
                 }
+            } while (computer[4].State != State.Halt);
 
+            return value;
+        }
+
+        protected override string Solve1(List<string> data)
+        {
+            var computers = InitComputers(data[0]);
+
+            var maxValue = 0;
+            foreach (var config in GetConfigs(0, 4))
+            {
+                var value = Solve1SingleRun(computers, config);
                 if (value > maxValue)
                     maxValue = value;
             }
@@ -72,7 +98,16 @@ namespace Day07
 
         protected override string Solve2(List<string> data)
         {
-            return "???";
+            var computer = InitComputers(data[0]);
+
+            var maxValue = 0;
+            foreach (var config in GetConfigs(5, 9))
+            {
+                var value = Solve2SingleRun(computer, config);
+                if (value > maxValue)
+                    maxValue = value;
+            }
+            return maxValue.ToString();
         }
 
     }

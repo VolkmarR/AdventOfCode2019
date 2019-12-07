@@ -112,13 +112,12 @@ namespace Day07
             }
             else if (op == 4)
             {
-                if (Output == null || State == State.OutputProduced)
+                if (Output == null)
                 {
                     Output = Mem[dest];
                     State = State.OutputProduced;
                     return true;
                 }
-
                 Output = null;
             }
             else if (op == 5)
