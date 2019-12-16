@@ -29,7 +29,8 @@ namespace Day16
         {
             var patternI = 0;
             var outputPosI = 0;
-            
+            sbyte patternDigit = 0;
+
             void Step()
             {
                 if (outputPosI == outputPos)
@@ -38,16 +39,18 @@ namespace Day16
                     outputPosI = 0;
                     if (patternI == pattern.Length)
                         patternI = 0;
+                    patternDigit = pattern[patternI];
                 }
                 else
                     outputPosI++;
             }
             
-            var result = 0;
+            long result = 0;
             Step();
             for (int i = 0; i < data.Length; i++)
             {
-                result += (int)(data[i] * pattern[patternI]);
+                if (patternDigit != 0)
+                    result += data[i] * patternDigit;
                 Step();
             }
 
@@ -104,7 +107,7 @@ namespace Day16
                 Swap(ref input, ref result);
             }
 
-            return string.Join(" ", input.Skip(22122816).Take(8));
+            return string.Join(" ", input.Skip(22122816).Take(8)) + Environment.NewLine + string.Join("", input);
         }
 
     }
